@@ -143,6 +143,10 @@ class singleton_unsafe_on_chip_allocator
 
   private:
 
+    // XXX we could probably encode the entire block structure
+    //     into a single 32b int:
+    //     | 1b wasted | 1b is_free | 15b size | 15b prev (left neighbor's size) |
+    //     this would make the maximum allocation 1 << 15 = 32kb
     struct block
     {
       // XXX this can safely be uint32
