@@ -1,7 +1,7 @@
 shmalloc
 ========
 
-Dynamic __shared__ memory allocation for CUDA
+Dynamic `__shared__` memory allocation for CUDA
 
 CUDA currently provides two avenues for allocating `__shared__` memory: static allocation via `__shared__` arrays and a single dynamically-allocated block which must sized at kernel launch time.
 
