@@ -6,6 +6,7 @@
 
 __global__ void sum_kernel(int *data, int *result, size_t max_data_segment_size)
 {
+  // thread 0 intializes the __shared__ memory heap with the dynamic size of on-chip memory
   if(threadIdx.x == 0)
   {
     init_on_chip_malloc(max_data_segment_size);
@@ -16,6 +17,9 @@ __global__ void sum_kernel(int *data, int *result, size_t max_data_segment_size)
 
   unsigned int n = blockDim.x;
 
+  // shmalloc isn't thread-safe, so make sure only thread 0 calls it
+  // note that the pointer is communicated through the statically allocated
+  // __shared__ variable s_s_data
   if(threadIdx.x == 0)
   {
     s_s_data = static_cast<int*>(shmalloc(n * sizeof(int)));
