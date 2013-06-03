@@ -65,7 +65,7 @@ int main()
 
   size_t smem_size = n * sizeof(int);
 
-  // allocate exactly as much as we will ask for
+  // allocate exactly as much on-chip shared memory as we will ask for
   // this won't be enough to keep everything on chip due to bookkeeping shmalloc needs to perform
   sum_kernel<<<1,n,smem_size>>>(thrust::raw_pointer_cast(vec.data()),
                                 thrust::raw_pointer_cast(sum.data()),
@@ -73,7 +73,7 @@ int main()
   std::cerr << "CUDA error: " << cudaGetErrorString(cudaDeviceSynchronize()) << std::endl;
   assert(n == sum[0]);
 
-  // allocate twice as much as we will ask for
+  // allocate twice as much on-chip shared memory as we will ask for
   // this should be enough to keep everything on chip
   smem_size = 2 * n * sizeof(int);
   sum_kernel<<<1,n,smem_size>>>(thrust::raw_pointer_cast(vec.data()),
@@ -82,7 +82,7 @@ int main()
   std::cerr << "CUDA error: " << cudaGetErrorString(cudaDeviceSynchronize()) << std::endl;
   assert(n == sum[0]);
 
-  // allocate half as much as we will ask for
+  // allocate half as much on-chip shared memory as we will ask for
   // this won't be enough to keep everything on chip
   smem_size = n * sizeof(int) / 2;
   sum_kernel<<<1,n,smem_size>>>(thrust::raw_pointer_cast(vec.data()),
@@ -91,7 +91,7 @@ int main()
   std::cerr << "CUDA error: " << cudaGetErrorString(cudaDeviceSynchronize()) << std::endl;
   assert(n == sum[0]);
 
-  // allocate no smem at all
+  // allocate no on-chip smem at all
   smem_size = 0;
   sum_kernel<<<1,n,smem_size>>>(thrust::raw_pointer_cast(vec.data()),
                                 thrust::raw_pointer_cast(sum.data()),
