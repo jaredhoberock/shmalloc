@@ -66,7 +66,7 @@ int main()
   size_t smem_size = n * sizeof(int);
 
   // allocate exactly as much as we will ask for
-  // this won't be enough to keep everything on chip
+  // this won't be enough to keep everything on chip due to bookkeeping shmalloc needs to perform
   sum_kernel<<<1,n,smem_size>>>(thrust::raw_pointer_cast(vec.data()),
                                 thrust::raw_pointer_cast(sum.data()),
                                 smem_size);
