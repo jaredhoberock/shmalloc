@@ -74,7 +74,7 @@ The following snippet demonstrates how to use `shmalloc` and `shfree` to manage 
     
       unsigned int n = blockDim.x;
     
-      // shmalloc isn't thread-safe, so make sure only thread 0 calls it
+      // we only need a single array for this block, so make sure only thread 0 calls shmalloc
       // note that the pointer is communicated through the statically allocated
       // __shared__ variable s_s_data
       if(threadIdx.x == 0)
