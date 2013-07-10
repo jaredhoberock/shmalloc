@@ -79,7 +79,7 @@ class singleton_unsafe_on_chip_allocator
   
     __device__ inline void *allocate(size_t size)
     {
-      size_t aligned_size = align4(size);
+      size_t aligned_size = align8(size);
     
       block *prev = find_first_free_insertion_point(m_heap_begin, m_heap_end, aligned_size);
     
@@ -88,7 +88,7 @@ class singleton_unsafe_on_chip_allocator
       if(prev != m_heap_end && (b = next(prev)) != m_heap_end)
       {
         // can we split?
-        if((b->size - aligned_size) >= sizeof(block) + 4) // +4 for alignment
+        if((b->size - aligned_size) >= sizeof(block))
         {
           split_block(b, aligned_size);
         } // end if
@@ -147,6 +147,7 @@ class singleton_unsafe_on_chip_allocator
     //     into a single 32b int:
     //     | 1b wasted | 1b is_free | 15b size | 15b prev (left neighbor's size) |
     //     this would make the maximum allocation 1 << 15 = 32kb
+    // XXX we ensure this type is aligned to sizeof(size_t)
     struct block
     {
       // XXX this can safely be uint32
@@ -154,7 +155,7 @@ class singleton_unsafe_on_chip_allocator
       block  *prev;
     
       // XXX we could use the MSB of size to encode is_free
-      int     is_free;
+      size_t  is_free;
     };
   
   
@@ -265,11 +266,11 @@ class singleton_unsafe_on_chip_allocator
     
       return new_block;
     } // end extend_heap()
-  
-  
-    __device__ inline static size_t align4(size_t size)
+
+
+    __device__ inline static size_t align8(size_t size)
     {
-      return ((((size - 1) >> 2) << 2) + 4);
+      return ((((size - 1) >> 3) << 3) + 8);
     } // end align4()
 }; // end singleton_unsafe_on_chip_allocator
 
