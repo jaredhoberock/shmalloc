@@ -70,7 +70,7 @@ The following snippet demonstrates how to use `shmalloc` and `shfree` to manage 
       }
       __syncthreads();
     
-      __shared__ int *s_s_data;
+      __shared__ int *s_data;
     
       unsigned int n = blockDim.x;
     
@@ -79,11 +79,9 @@ The following snippet demonstrates how to use `shmalloc` and `shfree` to manage 
       // __shared__ variable s_s_data
       if(threadIdx.x == 0)
       {
-        s_s_data = static_cast<int*>(shmalloc(n * sizeof(int)));
+        s_data = static_cast<int*>(shmalloc(n * sizeof(int)));
       }
       __syncthreads();
-    
-      int *s_data = s_s_data;
     
       for(int i = threadIdx.x; i < n; i += blockDim.x)
       {
