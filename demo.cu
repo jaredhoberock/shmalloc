@@ -19,7 +19,7 @@ __global__ void sum_kernel(int *data, int *result, size_t max_data_segment_size)
 
   // shmalloc isn't thread-safe, so make sure only thread 0 calls it
   // note that the pointer is communicated through the statically allocated
-  // __shared__ variable s_s_data
+  // __shared__ variable s_data
   if(threadIdx.x == 0)
   {
     s_data = static_cast<int*>(shmalloc(n * sizeof(int)));

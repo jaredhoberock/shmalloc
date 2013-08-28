@@ -76,7 +76,7 @@ The following snippet demonstrates how to use `shmalloc` and `shfree` to manage 
     
       // we only need a single array for this block, so make sure only thread 0 calls shmalloc
       // note that the pointer is communicated through the statically allocated
-      // __shared__ variable s_s_data
+      // __shared__ variable s_data
       if(threadIdx.x == 0)
       {
         s_data = static_cast<int*>(shmalloc(n * sizeof(int)));
