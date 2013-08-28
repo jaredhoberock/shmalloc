@@ -13,7 +13,7 @@ __global__ void sum_kernel(int *data, int *result, size_t max_data_segment_size)
   }
   __syncthreads();
 
-  __shared__ int *s_s_data;
+  __shared__ int *s_data;
 
   unsigned int n = blockDim.x;
 
@@ -22,11 +22,9 @@ __global__ void sum_kernel(int *data, int *result, size_t max_data_segment_size)
   // __shared__ variable s_s_data
   if(threadIdx.x == 0)
   {
-    s_s_data = static_cast<int*>(shmalloc(n * sizeof(int)));
+    s_data = static_cast<int*>(shmalloc(n * sizeof(int)));
   }
   __syncthreads();
-
-  int *s_data = s_s_data;
 
   for(int i = threadIdx.x; i < n; i += blockDim.x)
   {
