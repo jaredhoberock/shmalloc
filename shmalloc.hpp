@@ -142,7 +142,19 @@ class singleton_unsafe_on_chip_allocator
 
 
   private:
-    class block
+    template<unsigned int> struct aligned_type;
+
+    template<> struct aligned_type<4>
+    {
+      typedef struct __align__(4) type {};
+    };
+
+    template<> struct aligned_type<8>
+    {
+      typedef struct __align__(8) type {};
+    };
+
+    class block : public aligned_type<2 * sizeof(size_t)>::type
     {
       public:
         __device__ inline size_t size() const
