@@ -1,6 +1,7 @@
 #include <cstdio>
 #include <cassert>
 #include <thrust/device_vector.h>
+#include <iostream>
 #include "shmalloc.hpp"
 
 
@@ -100,6 +101,8 @@ int main()
                                 smem_size);
   std::cerr << "CUDA error: " << cudaGetErrorString(cudaDeviceSynchronize()) << std::endl;
   assert(n == sum[0]);
+
+  std::cout << "OK" << std::endl;
 
   return 0;
 }

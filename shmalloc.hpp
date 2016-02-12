@@ -2,8 +2,8 @@
 
 
 #include <thrust/detail/config.h>
-#include <thrust/system/cuda/detail/detail/uninitialized.h>
 #include <cstdlib>
+#include <type_traits>
 
 
 #if !defined(__CUDA_ARCH__) || (__CUDA_ARCH__ >= 200)
@@ -11,6 +11,80 @@
 
 namespace detail
 {
+
+
+template<typename T>
+  class uninitialized
+{
+  private:
+    typename std::aligned_storage<
+      sizeof(T),
+      std::alignment_of<T>::value
+    >::type storage;
+
+    __host__ __device__ __forceinline__
+    const T* ptr() const
+    {
+      const void *result = storage.data;
+      return reinterpret_cast<const T*>(result);
+    }
+
+    __host__ __device__ __forceinline__
+    T* ptr()
+    {
+      return reinterpret_cast<T*>(&storage);
+    }
+
+  public:
+    // copy assignment
+    __host__ __device__ __forceinline__
+    uninitialized<T> &operator=(const T &other)
+    {
+      T& self = *this;
+      self = other;
+      return *this;
+    }
+
+    __host__ __device__ __forceinline__
+    T& get()
+    {
+      return *ptr();
+    }
+
+    __host__ __device__ __forceinline__
+    const T& get() const
+    {
+      return *ptr();
+    }
+
+    __host__ __device__ __forceinline__
+    operator T& ()
+    {
+      return get();
+    }
+
+    __host__ __device__ __forceinline__
+    operator const T&() const
+    {
+      return get();
+    }
+
+    #pragma nv_exec_check_disable
+    template<typename... Args>
+    __host__ __device__ __forceinline__
+    void construct(Args&&... args)
+    {
+      ::new(ptr()) T(std::forward<Args>(args)...);
+    }
+
+    #pragma nv_exec_check_disable
+    __host__ __device__ __forceinline__
+    void destroy()
+    {
+      T& self = *this;
+      self.~T();
+    }
+};
 
 
 extern __shared__ int s_data_segment_begin[];
@@ -142,19 +216,7 @@ class singleton_unsafe_on_chip_allocator
 
 
   private:
-    template<unsigned int> struct aligned_type;
-
-    template<> struct aligned_type<4>
-    {
-      typedef struct __align__(4) type {};
-    };
-
-    template<> struct aligned_type<8>
-    {
-      typedef struct __align__(8) type {};
-    };
-
-    class block : public aligned_type<2 * sizeof(size_t)>::type
+    class block
     {
       public:
         __device__ inline size_t size() const
@@ -198,6 +260,8 @@ class singleton_unsafe_on_chip_allocator
         } // end data()
 
       private:
+        std::aligned_storage<2 * sizeof(size_t)>::type m_data;
+
         // this packing ensures that sizeof(block) is compatible with 64b alignment, because:
         // on a 32b platform, sizeof(block) == 64b
         // on a 64b platform, sizeof(block) == 128b
@@ -384,7 +448,7 @@ class singleton_on_chip_allocator
 }; // end singleton_on_chip_allocator
 
 
-__shared__  thrust::system::cuda::detail::detail::uninitialized<singleton_on_chip_allocator> s_on_chip_allocator;
+__shared__  uninitialized<singleton_on_chip_allocator> s_on_chip_allocator;
 
 
 } // end detail
